@@ -15,29 +15,31 @@ import torch
 import torchvision
 import torch.utils.data
 
-x_train = torch.Tensor(np.random.randn(1,3,50,50))
-y_train = torch.Tensor(np.random.randn(1,3,50,50))
-
-x_train0 = cv2.imread("./data/22678915_15.tif")
-x_train1 = x_train0.transpose(2,0,1)
-x_train2 = x_train1[np.newaxis,:]
-x_train3 = x_train2.astype(np.float32)
-x_train4 = x_train3/255.0;
-x_train = torch.Tensor(x_train4)
 
 
-y_train0 = cv2.imread("./data/22678915_15.tiff")
-y_train1 = y_train0.transpose(2,0,1)
-y_train2 = y_train1[np.newaxis,:]
-y_train3 = y_train2.astype(np.float32)
-y_train4 = y_train3/255.0;
-y_train = torch.Tensor(y_train4)
+# x_train = torch.Tensor(np.random.randn(1,3,50,50))
+# y_train = torch.Tensor(np.random.randn(1,3,50,50))
+
+# x_train0 = cv2.imread("./data/22678915_15.tif")
+# x_train1 = x_train0.transpose(2,0,1)
+# x_train2 = x_train1[np.newaxis,:]
+# x_train3 = x_train2.astype(np.float32)
+# x_train4 = x_train3/255.0;
+# x_train = torch.Tensor(x_train4)
+
+
+# y_train0 = cv2.imread("./data/22678915_15.tiff")
+# y_train1 = y_train0.transpose(2,0,1)
+# y_train2 = y_train1[np.newaxis,:]
+# y_train3 = y_train2.astype(np.float32)
+# y_train4 = y_train3/255.0;
+# y_train = torch.Tensor(y_train4)
 
 
 
 
 #cv2.imshow("x_train0", x_train0)
-cv2.imshow("y_train1", y_train1)
+#cv2.imshow("y_train1", y_train1)
 
 
 class SentimentDataset(torch.utils.data.Dataset):
@@ -165,62 +167,62 @@ optimizer = torch.optim.SGD(model.parameters(), lr=1e-9)
 fit(20, model,criterion, optimizer,dataloader,debug=False)
 
 
-def fit(epochs, model, loss_func, opt, train_dl, valid_dl):
-    for epoch in range(epochs):
-        for xb,yb in train_dl:
-            pred = model(xb)
-            loss = loss_func(pred,yb)
-            #print (loss)
+# def fit(epochs, model, loss_func, opt, train_dl, valid_dl):
+#     for epoch in range(epochs):
+#         for xb,yb in train_dl:
+#             pred = model(xb)
+#             loss = loss_func(pred,yb)
+#             #print (loss)
             
-            loss.backward()
-            opt.step()
-            opt.zero_grad()
+#             loss.backward()
+#             opt.step()
+#             opt.zero_grad()
             
-        model.eval()
-        with torch.no_grad():
-            valid_loss = sum(loss_func(model(xb), yb) for xb, yb in valid_dl)
+#         model.eval()
+#         with torch.no_grad():
+#             valid_loss = sum(loss_func(model(xb), yb) for xb, yb in valid_dl)
 
-        print(epoch, valid_loss / len(valid_dl))
+#         print(epoch, valid_loss / len(valid_dl))
 
-o = cv2.imread("./data/22678915_15.tif")
-
-
-cv2.imshow("origin", o)
-#cv2.imshow("erode result", r)
-cv2.waitKey()
-cv2.destroyAllWindows()
-
-oo = o.transpose(2,0,1)
-ooo = oo[np.newaxis,:]
+# o = cv2.imread("./data/22678915_15.tif")
 
 
-# N is batch size; D_in is input dimension;
-# H is hidden dimension; D_out is output dimension.
-N, D_in, D_out = 4, (5,5), (5,5)
+# cv2.imshow("origin", o)
+# #cv2.imshow("erode result", r)
+# cv2.waitKey()
+# cv2.destroyAllWindows()
 
-inputShape = [N] + list(D_in)
-outputShape = [N] + list(D_out)
+# oo = o.transpose(2,0,1)
+# ooo = oo[np.newaxis,:]
 
-# Create random input and output data
-x = np.random.randn(*inputShape)
-y = np.random.randn(*outputShape)
 
-# Randomly initialize weights
-w1 = np.random.randn(25, 25)
+# # N is batch size; D_in is input dimension;
+# # H is hidden dimension; D_out is output dimension.
+# N, D_in, D_out = 4, (5,5), (5,5)
 
-learning_rate = 1e-6
+# inputShape = [N] + list(D_in)
+# outputShape = [N] + list(D_out)
 
-for t in range(2000):
-    xx = x.reshape(4,25)
-    yy = y.reshape(4,25)
-    yy_pred = xx.dot(w1)
+# # Create random input and output data
+# x = np.random.randn(*inputShape)
+# y = np.random.randn(*outputShape)
+
+# # Randomly initialize weights
+# w1 = np.random.randn(25, 25)
+
+# learning_rate = 1e-6
+
+# for t in range(2000):
+#     xx = x.reshape(4,25)
+#     yy = y.reshape(4,25)
+#     yy_pred = xx.dot(w1)
     
-    y_pred = yy_pred.reshape(4,5,5)
+#     y_pred = yy_pred.reshape(4,5,5)
     
-    loss = np.square(y_pred-y).sum()   
-    print(t, loss) 
+#     loss = np.square(y_pred-y).sum()   
+#     print(t, loss) 
     
-    grad_yy_pred = 2.0 * (yy_pred - yy)
-    grad_w1 = xx.T.dot(grad_yy_pred)
-    w1 -= learning_rate * grad_w1
+#     grad_yy_pred = 2.0 * (yy_pred - yy)
+#     grad_w1 = xx.T.dot(grad_yy_pred)
+#     w1 -= learning_rate * grad_w1
  
