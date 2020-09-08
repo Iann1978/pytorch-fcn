@@ -15,7 +15,7 @@ import torch
 import torchvision
 import torch.utils.data
 
-
+device = torch.device("cpu")
 
 # x_train = torch.Tensor(np.random.randn(1,3,50,50))
 # y_train = torch.Tensor(np.random.randn(1,3,50,50))
@@ -158,6 +158,7 @@ class Net(nn.Module):
 
 
 model = Net()
+model.to(device)
 
 criterion =  lambda y_pred, y_true: torch.square(y_true-y_pred).sum()
 optimizer = torch.optim.SGD(model.parameters(), lr=1e-9)
