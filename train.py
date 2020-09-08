@@ -15,7 +15,7 @@ import torch
 import torchvision
 import torch.utils.data
 
-device = torch.device("cpu")
+device = torch.device("cuda:0")
 
 # x_train = torch.Tensor(np.random.randn(1,3,50,50))
 # y_train = torch.Tensor(np.random.randn(1,3,50,50))
@@ -75,7 +75,7 @@ class SentimentDataset(torch.utils.data.Dataset):
         #cv2.imshow("x_train0", x_train0)
         #cv2.imshow("y_train0", y_train0)
         #cv2.imshow("y_train1", y_train1)
-        return x_train[0,:,0:640,0:640],y_train[0,:,0:640,0:640]
+        return x_train[0,:,0:640,0:640].to(device),y_train[0,:,0:640,0:640].to(device)
     
 dataset = SentimentDataset()
 dataloader = torch.utils.data.DataLoader(dataset, batch_size=1,shuffle=False)
@@ -94,12 +94,13 @@ def fit(eporchs, model, criterion, optimizer,dataloader,debug=False):
             
             print(y_pred.shape)
             
-            pic_pred = y_pred.detach().numpy()
-            pic_pred = pic_pred.squeeze()
-            #pic_pred = pic_pred.transpose(1,2,0)
-            print(pic_pred.shape)
+            
 
             if (debug):
+                pic_pred = y_pred.detach().numpy()
+                pic_pred = pic_pred.squeeze()
+                #pic_pred = pic_pred.transpose(1,2,0)
+                print(pic_pred.shape)
                 cv2.imshow("pic_pred", pic_pred)
             #cv2.imshow("erode result", r)
             #cv2.waitKey()
