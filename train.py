@@ -77,13 +77,7 @@ class SentimentDataset(torch.utils.data.Dataset):
         #cv2.imshow("y_train1", y_train1)
         return x_train[0,:,0:640,0:640].to(device),y_train[0,:,0:640,0:640].to(device)
     
-dataset = SentimentDataset()
-dataloader = torch.utils.data.DataLoader(dataset, batch_size=1,shuffle=False)
 
-for xb,yb in dataloader:
-     print(xb.shape)
-     print(yb.shape)
-     
      
      
 
@@ -158,17 +152,26 @@ class Net(nn.Module):
         return x
 
 
-model = Net()
-model.to(device)
+def train():
+    dataset = SentimentDataset()
+    dataloader = torch.utils.data.DataLoader(dataset, batch_size=1,shuffle=False)
+    
+    for xb,yb in dataloader:
+         print(xb.shape)
+         print(yb.shape)
+         
+    
+    model = Net()
+    model.to(device)
+    
+    criterion =  lambda y_pred, y_true: torch.square(y_true-y_pred).sum()
+    optimizer = torch.optim.SGD(model.parameters(), lr=1e-9)
+    
+    
+    
+    fit(20, model,criterion, optimizer,dataloader,debug=False)
 
-criterion =  lambda y_pred, y_true: torch.square(y_true-y_pred).sum()
-optimizer = torch.optim.SGD(model.parameters(), lr=1e-9)
-
-
-
-fit(20, model,criterion, optimizer,dataloader,debug=False)
-
-
+train()
 # def fit(epochs, model, loss_func, opt, train_dl, valid_dl):
 #     for epoch in range(epochs):
 #         for xb,yb in train_dl:
