@@ -6,7 +6,7 @@ Created on Fri Sep  4 14:51:25 2020
 """
 
 
-
+import argparse
 import cv2
 import numpy as np
 import torch.nn as nn
@@ -152,7 +152,10 @@ class Net(nn.Module):
         return x
 
 
-def train():
+def train(opt):
+    
+    epochs = opt.epochs
+    
     dataset = SentimentDataset()
     dataloader = torch.utils.data.DataLoader(dataset, batch_size=1,shuffle=False)
     
@@ -169,9 +172,19 @@ def train():
     
     
     
-    fit(20, model,criterion, optimizer,dataloader,debug=False)
+    fit(epochs, model,criterion, optimizer,dataloader,debug=False)
 
-train()
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--epochs', type=int, default=5)
+    opt = parser.parse_args()
+    print(opt)
+    
+    train(opt)
+
+#train()
 # def fit(epochs, model, loss_func, opt, train_dl, valid_dl):
 #     for epoch in range(epochs):
 #         for xb,yb in train_dl:
