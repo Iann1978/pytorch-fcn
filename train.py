@@ -14,6 +14,7 @@ import torch.nn.functional as F
 import torch
 import torchvision
 import torch.utils.data
+import os
 
 from models.common import Conv
 
@@ -167,6 +168,7 @@ class Net(nn.Module):
 def train(opt):
     
     epochs = opt.epochs
+    weights = opt.weights
     
     dataset = SentimentDataset()
     dataloader = torch.utils.data.DataLoader(dataset, batch_size=1,shuffle=False)
@@ -175,8 +177,9 @@ def train(opt):
          print(xb.shape)
          print(yb.shape)
          
-    
-    model = Net()
+    #if os.path.exists(test_file.txt)
+    #model = Net()
+    model = torch.load(weights) if os.path.exists(weights) else Net()
     model.to(device)
     
     criterion =  lambda y_pred, y_true: torch.square(y_true-y_pred).sum()
@@ -185,12 +188,15 @@ def train(opt):
     
     
     fit(epochs, model,criterion, optimizer,dataloader,debug=False)
+    
+    torch.save(model, './inference/model')
 
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--epochs', type=int, default=5)
+    parser.add_argument('--weights', type=str, default='', help='initial weights path')
     opt = parser.parse_args()
     print(opt)
     
