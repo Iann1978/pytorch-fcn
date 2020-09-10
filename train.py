@@ -16,6 +16,8 @@ import torchvision
 import torch.utils.data
 import os
 
+from torch.utils.tensorboard import SummaryWriter
+
 from models.common import Conv
 
 device = torch.device("cuda:0")
@@ -181,6 +183,13 @@ def train(opt):
     #model = Net()
     model = torch.load(weights) if os.path.exists(weights) else Net()
     model.to(device)
+   
+    # Output model to tensorboard
+    images, masks = next(iter(dataloader))    
+    writer = SummaryWriter('runs/fashion_mnist_experiment_1')
+    writer.add_graph(model, images)
+    writer.close()
+
     
     criterion =  lambda y_pred, y_true: torch.square(y_true-y_pred).sum()
     optimizer = torch.optim.SGD(model.parameters(), lr=1e-9)
