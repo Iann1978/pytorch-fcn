@@ -242,16 +242,33 @@ def train(opt):
     writer = SummaryWriter('runs/fashion_mnist_experiment_1')
     writer.add_graph(model, images)
     writer.close()
+    
+   
 
     
     criterion =  lambda y_pred, y_true: torch.square(y_true-y_pred).sum()
     optimizer = torch.optim.SGD(model.parameters(), lr=1e-9)
-    
-    
-    
     fit(epochs, model,criterion, optimizer,dataloader,debug=False)
-    
+
+    # Save model    
     torch.save(model, './inference/model')
+    
+    
+     # Save the predict
+    print('images.shape:', images.shape)
+    pred = model(images);
+    pred1 = pred.cpu().detach().numpy();
+    pred2 = pred1[0,:]
+    pred3 = pred2.transpose(1,2,0)
+    pred4 = pred3*255.
+    print('pred4.shape:', pred4.shape)
+    cv2.imwrite('./inference/pred.jpg', pred4)
+    
+    return
+
+    
+    
+    
 
 
 
