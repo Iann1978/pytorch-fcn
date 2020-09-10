@@ -86,9 +86,9 @@ class SentimentDataset(torch.utils.data.Dataset):
      
      
 
-def fit(eporchs, model, criterion, optimizer,dataloader,debug=False):
+def fit(eporchs, model, criterion, optimizer,train_dl, valid_dl,debug=False):
     for t in range(eporchs):
-        for x_train,y_train in dataloader:
+        for x_train,y_train in train_dl:
             y_pred = model(x_train)
             
             print(y_pred.shape)
@@ -225,10 +225,10 @@ def train(opt):
     epochs = opt.epochs
     weights = opt.weights
     
-    dataset = SentimentDataset()
-    dataloader = torch.utils.data.DataLoader(dataset, batch_size=1,shuffle=False)
+    train_ds = SentimentDataset()
+    train_dl = torch.utils.data.DataLoader(train_ds, batch_size=1,shuffle=False)
     
-    for xb,yb in dataloader:
+    for xb,yb in train_dl:
          print(xb.shape)
          print(yb.shape)
          
@@ -238,7 +238,7 @@ def train(opt):
     model.to(device)
    
     # Output model to tensorboard
-    images, masks = next(iter(dataloader))    
+    images, masks = next(iter(train_dl))    
     writer = SummaryWriter('runs/fashion_mnist_experiment_1')
     writer.add_graph(model, images)
     writer.close()
@@ -248,7 +248,7 @@ def train(opt):
     
     criterion =  lambda y_pred, y_true: torch.square(y_true-y_pred).sum()
     optimizer = torch.optim.SGD(model.parameters(), lr=1e-9)
-    fit(epochs, model,criterion, optimizer,dataloader,debug=False)
+    fit(epochs, model,criterion, optimizer,train_dl,None,debug=False)
 
     # Save model    
     torch.save(model, './inference/model')
