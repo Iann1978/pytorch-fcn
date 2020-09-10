@@ -122,48 +122,101 @@ class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
         
-        self.conv1 = Conv(3,64,3,1)
-        
-        #self.conv1_1 = nn.Conv2d(3, 64, 3,padding=1)
-        #self.relu1_1 = nn.ReLU(inplace=True)
-        #self.conv1_2 = nn.Conv2d(64, 64, 3,padding=1)
-        #self.relu1_2 = nn.ReLU(inplace=True)
+        # conv1
+        self.conv1_1 = Conv(3,64,3,1)
+        self.conv1_2 = Conv(64,64,3,1)
         self.pool1 = nn.MaxPool2d(2, 2)  # 1/2
         
         
-         # conv2
-        # self.conv2_1 = nn.Conv2d(64, 128, 3, padding=1)
-        # self.relu2_1 = nn.ReLU(inplace=True)
-        # self.conv2_2 = nn.Conv2d(128, 1, 3, padding=1)
-        # self.relu2_2 = nn.ReLU(inplace=True)
-        
-        self.conv2 = Conv(64,1,3,1)
+        # conv2
+        self.conv2_1 = Conv(64,128,3,1)
+        self.conv2_2 = Conv(128,128,3,1)
         self.pool2 = nn.MaxPool2d(2,2)  # 1/4
+        
+        # conv3
+        self.conv3_1 = Conv(128,256,3,1)
+        self.conv3_2 = Conv(256,256,3,1)
+        self.pool3 = nn.MaxPool2d(2,2)  # 1/8
+        
+        # conv4
+        self.conv4_1 = Conv(256,512,3,1)
+        self.conv4_2 = Conv(512,512,3,1)
+        self.conv4_3 = Conv(512,512,3,1)
+        self.pool4 = nn.MaxPool2d(2,2)  # 1/16
+        
+        # conv5
+        self.conv5_1 = Conv(512,512,3,1)
+        self.conv5_2 = Conv(512,512,3,1)
+        self.conv5_3 = Conv(512,512,3,1)
+        self.pool5 = nn.MaxPool2d(2,2)  # 1/32
+        
+        # fc6
+        #self.fc6 = Conv(512,4096,3,1)
+        #self.drop6 = nn.Dropout2d()
+        
+        # fc7
+        #self.fc7 = Conv(4096,4096,3,1)
+        #self.drop7 = nn.Dropout2d()
+        
+        self.score_fr =  Conv(512,1,3,1)
+        self.score_pool3 = Conv(256, 1, 3, 1)
+        self.score_pool4 = Conv(512, 1, 3, 1)
+        
+        #self.upscore1 = nn.ConvTranspose2d(1, 1, 4, stride=2, bias=False)
+        self.upscore1 = nn.Upsample(scale_factor=2)
+        self.upscore2 = nn.Upsample(scale_factor=2)
+        self.upscore3 = nn.Upsample(scale_factor=2)
         
         
         self.upsam1 = nn.Upsample(scale_factor=2)
         self.upsam2 = nn.Upsample(scale_factor=2)
+        self.upsam3 = nn.Upsample(scale_factor=2)
+        self.upsam4 = nn.Upsample(scale_factor=2)
+        self.upsam5 = nn.Upsample(scale_factor=2)
 
     def forward(self, x):
-        # x = self.conv1_1(x)
-        # x = self.relu1_1(x)
-        # x = self.conv1_2(x)
-        # x = self.relu1_2(x)
-        # x = self.pool1(x)
-        
-        x = self.conv1(x)
+
+        x = self.conv1_1(x)
+        x = self.conv1_2(x)
         x = self.pool1(x)
         
-        # x = self.conv2_1(x)
-        # x = self.relu2_1(x)
-        # x = self.conv2_2(x)
-        # x = self.relu2_2(x)
-        
-        x = self.conv2(x)
+
+        x = self.conv2_1(x)
+        x = self.conv2_2(x)
         x = self.pool2(x)
         
+        x = self.conv3_1(x)
+        x = self.conv3_2(x)
+        x = self.pool3(x)
+        
+        x = self.conv4_1(x)
+        x = self.conv4_2(x)
+        x = self.conv4_3(x)
+        x = self.pool4(x)
+        
+        x = self.conv5_1(x)
+        x = self.conv5_2(x)
+        x = self.conv5_3(x)
+        x = self.pool5(x)
+        
+        #x = self.fc6(x)
+        #x = self.drop6(x)
+        
+        #x = self.fc7(x)
+        #x = self.drop7(x)
+        
+        x = self.score_fr(x)
+        
+        fc7_score = x
+        y = self.upscore1(fc7_score)
+        
         x = self.upsam1(x)
+        x = x + y
+        #x = y
         x = self.upsam2(x)
+        x = self.upsam3(x)
+        x = self.upsam4(x)
+        x = self.upsam5(x)
         return x
 
 
