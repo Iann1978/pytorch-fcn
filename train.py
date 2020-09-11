@@ -151,21 +151,21 @@ class Net(nn.Module):
         self.pool5 = nn.MaxPool2d(2,2)  # 1/32
         
         # fc6
-        #self.fc6 = Conv(512,4096,3,1)
-        #self.drop6 = nn.Dropout2d()
+        self.fc6 = Conv(512,512,19,1)
+        self.drop6 = nn.Dropout2d()
         
         # fc7
-        #self.fc7 = Conv(4096,4096,3,1)
+        self.fc7 = Conv(512,512,19,1)
         #self.drop7 = nn.Dropout2d()
         
-        self.score_fr =  Conv(512,1,3,1)
-        self.score_pool3 = Conv(256, 1, 3, 1)
-        self.score_pool4 = Conv(512, 1, 3, 1)
+        self.score_32s =  Conv(512,1,3,1)
+        self.score_16s = Conv(1024, 1, 3, 1)
+        self.score_8s = Conv(1280, 1, 3, 1)
         
-        #self.upscore1 = nn.ConvTranspose2d(1, 1, 4, stride=2, bias=False)
-        self.upscore1 = nn.Upsample(scale_factor=2)
-        self.upscore2 = nn.Upsample(scale_factor=2)
-        self.upscore3 = nn.Upsample(scale_factor=2)
+        self.upscore1 = nn.ConvTranspose2d(512, 512, 4, 2, 1, bias=False)
+        #self.upscore1 = nn.Upsample(scale_factor=2)
+        self.upscore2 = nn.ConvTranspose2d(1024, 1024, 4, 2, 1, bias=False)
+        self.upscore3 = nn.ConvTranspose2d(1280, 1280, 4, 2, 1, bias=False)
         
         
         self.upsam1 = nn.Upsample(scale_factor=2)
@@ -188,33 +188,54 @@ class Net(nn.Module):
         x = self.conv3_1(x)
         x = self.conv3_2(x)
         x = self.pool3(x)
+        pool3 = x  # 1/8
         
         x = self.conv4_1(x)
         x = self.conv4_2(x)
         x = self.conv4_3(x)
         x = self.pool4(x)
+        pool4 = x  # 1/16
         
         x = self.conv5_1(x)
         x = self.conv5_2(x)
         x = self.conv5_3(x)
         x = self.pool5(x)
         
-        #x = self.fc6(x)
-        #x = self.drop6(x)
+        x = self.fc6(x)
+        x = self.drop6(x)
         
-        #x = self.fc7(x)
+        x = self.fc7(x)
         #x = self.drop7(x)
+        fc7 = x
         
-        x = self.score_fr(x)
+        x = self.upscore1(fc7)
         
-        fc7_score = x
-        y = self.upscore1(fc7_score)
+        fcn_32s = self.score_32s(x) 
         
-        x = self.upsam1(x)
-        x = x + y
+
+        x = torch.cat((pool4,x),1)
+        x = self.upscore2(x)
+        
+        fcn_16s = self.score_16s(x)
+        
+        print('pool3.shape:', pool3.shape)
+        print('x.shape:', x.shape)
+        x = torch.cat((pool3,x),1)
+        
+        x = self.upscore3(x)
+        fcn_8s = self.score_8s(x)
+         
+        x = fcn_8s
+        #fc7_score = x
+        
+       
+        # = self.upsam1(x)
+        
+        #y = self.upscore1(fc7_score)
+        #x = x + y
         #x = y
-        x = self.upsam2(x)
-        x = self.upsam3(x)
+        #x = self.upsam2(x)
+        #x = self.upsam3(x)
         x = self.upsam4(x)
         x = self.upsam5(x)
         return x
