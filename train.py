@@ -21,6 +21,8 @@ from torch.utils.tensorboard import SummaryWriter
 from models.common import Conv
 from models.fcn import Net
 
+from utils.datasets import SentimentDataset
+
 device = torch.device("cuda:0")
 
 # x_train = torch.Tensor(np.random.randn(1,3,50,50))
@@ -48,44 +50,6 @@ device = torch.device("cuda:0")
 #cv2.imshow("y_train1", y_train1)
 
 
-class SentimentDataset(torch.utils.data.Dataset):
-    def __init__(self):
-        super().__init__()
-
-    def __len__(self):
-        return 1
-    
-    def __getitem__(self, idx):
-        x_train0 = cv2.imread("./data/22678915_15.tiff")
-        x_train1 = x_train0.transpose(2,0,1)
-        x_train2 = x_train1[np.newaxis,:]
-        x_train3 = x_train2.astype(np.float32)
-        x_train4 = x_train3/255.0;
-        x_train = torch.Tensor(x_train4)
-        
-        
-        y_train0 = cv2.imread("./data/22678915_15.tif")
-        y_train1 = y_train0.transpose(2,0,1)
-        y_train2 = y_train1[np.newaxis,:]
-        y_train3 = y_train2.astype(np.float32)
-        y_train4 = y_train3/255.0;
-        y_train = torch.Tensor(y_train4)
-        
-        y_train0 = cv2.imread("./data/22678915_15.tif")
-        y_train1 = y_train0[:,:,2]
-        y_train2 = y_train1[np.newaxis, np.newaxis,:]
-        y_train3 = y_train2.astype(np.float32)
-        y_train4 = y_train3/255.0;
-        y_train = torch.Tensor(y_train4)
-        
-        #cv2.imshow("x_train0", x_train0)
-        #cv2.imshow("y_train0", y_train0)
-        #cv2.imshow("y_train1", y_train1)
-        return x_train[0,:,0:640,0:640].to(device),y_train[0,:,0:640,0:640].to(device)
-    
-
-     
-     
 
 def fit(eporchs, model, criterion, optimizer,train_dl, valid_dl,debug=False):
     for t in range(eporchs):
@@ -126,7 +90,7 @@ def train(opt):
     epochs = opt.epochs
     weights = opt.weights
     
-    train_ds = SentimentDataset()
+    train_ds = SentimentDataset(device)
     train_dl = torch.utils.data.DataLoader(train_ds, batch_size=1,shuffle=False)
     
     for xb,yb in train_dl:
