@@ -133,6 +133,12 @@ def train(opt):
     print('pred4.shape:', pred4.shape)
     cv2.imwrite('./inference/pred.jpg', pred4)
     
+    topred1= images.cpu().detach().numpy()
+    topred2 = topred1[0,:]
+    topred3 = topred2.transpose(1,2,0)
+    topred4 = topred3*255.
+    cv2.imwrite('./inference/topred4.jpg', topred4)
+    
     return
 
     
@@ -144,7 +150,7 @@ def train(opt):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--batch-size', type=int, default=2, help='total batch size for all GPUs')
-    parser.add_argument('--img-size', nargs='+', type=int, default=[352, 352], help='train,test sizes')
+    parser.add_argument('--img-size', nargs='+', type=int, default=[320, 320], help='train,test sizes')
     parser.add_argument('--epochs', type=int, default=5)
     parser.add_argument('--weights', type=str, default='', help='initial weights path')
     opt = parser.parse_args()
