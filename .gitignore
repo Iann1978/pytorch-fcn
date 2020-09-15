@@ -2,3 +2,5 @@
 inference
 runs
 data/bag
+data
+__pycache__
