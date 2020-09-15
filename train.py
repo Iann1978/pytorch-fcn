@@ -91,9 +91,10 @@ def train(opt):
     epochs = opt.epochs
     weights = opt.weights
     batch_size = opt.batch_size
+    img_size = tuple(opt.img_size)
     
     #train_ds = SentimentDataset(device)
-    train_ds = BagDataset('./data/two_bag',device)
+    train_ds = BagDataset('./data/two_bag',device=device,img_size=img_size)
     train_dl = torch.utils.data.DataLoader(train_ds, batch_size=batch_size,shuffle=False)
     
     for xb,yb in train_dl:
@@ -143,6 +144,7 @@ def train(opt):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--batch-size', type=int, default=2, help='total batch size for all GPUs')
+    parser.add_argument('--img-size', nargs='+', type=int, default=[352, 352], help='train,test sizes')
     parser.add_argument('--epochs', type=int, default=5)
     parser.add_argument('--weights', type=str, default='', help='initial weights path')
     opt = parser.parse_args()

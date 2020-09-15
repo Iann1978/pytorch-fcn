@@ -60,13 +60,15 @@ class SentimentDataset(torch.utils.data.Dataset):
 
 
 class BagDataset(torch.utils.data.Dataset):
-    def __init__(self,data_dir,device):
+    def __init__(self,data_dir,device,img_size=(320,320)):
         super().__init__()
         self.data_dir = data_dir
         self.img_dir = os.path.join(data_dir,"images")
         self.msk_dir = os.path.join(data_dir,"masks")
+        self.img_size = img_size
         self.device = device
         self.img_count = len([lists for lists in os.listdir(self.img_dir) if os.path.isfile(os.path.join(self.img_dir, lists))])
+        
 
     def __len__(self):
         return self.img_count
@@ -78,7 +80,7 @@ class BagDataset(torch.utils.data.Dataset):
         
         
         x_train0 = cv2.imread(img_file)
-        x_train0 = cv2.resize(x_train0, (320, 320))
+        x_train0 = cv2.resize(x_train0, self.img_size)
         x_train1 = x_train0.transpose(2,0,1)
         x_train2 = x_train1[np.newaxis,:]
         x_train3 = x_train2.astype(np.float32)
@@ -87,7 +89,7 @@ class BagDataset(torch.utils.data.Dataset):
         
         
         y_train0 = cv2.imread(msk_file)
-        y_train0 = cv2.resize(y_train0, (320, 320))
+        y_train0 = cv2.resize(y_train0, self.img_size)
         y_train1 = y_train0[:,:,2]
         y_train2 = y_train1[np.newaxis, np.newaxis,:]
         y_train3 = y_train2.astype(np.float32)
