@@ -78,7 +78,7 @@ class BagDataset(torch.utils.data.Dataset):
         
         
         x_train0 = cv2.imread(img_file)
-        x_train0 = cv2.resize(x_train0, (640, 640))
+        x_train0 = cv2.resize(x_train0, (320, 320))
         x_train1 = x_train0.transpose(2,0,1)
         x_train2 = x_train1[np.newaxis,:]
         x_train3 = x_train2.astype(np.float32)
@@ -87,7 +87,7 @@ class BagDataset(torch.utils.data.Dataset):
         
         
         y_train0 = cv2.imread(msk_file)
-        y_train0 = cv2.resize(y_train0, (640, 640))
+        y_train0 = cv2.resize(y_train0, (320, 320))
         y_train1 = y_train0[:,:,2]
         y_train2 = y_train1[np.newaxis, np.newaxis,:]
         y_train3 = y_train2.astype(np.float32)
