@@ -22,6 +22,7 @@ from models.common import Conv
 from models.fcn import Net
 
 from utils.datasets import SentimentDataset
+from utils.datasets import BagDataset
 
 device = torch.device("cuda:0")
 
@@ -90,7 +91,8 @@ def train(opt):
     epochs = opt.epochs
     weights = opt.weights
     
-    train_ds = SentimentDataset(device)
+    #train_ds = SentimentDataset(device)
+    train_ds = BagDataset('./data/two_bag',device)
     train_dl = torch.utils.data.DataLoader(train_ds, batch_size=1,shuffle=False)
     
     for xb,yb in train_dl:
@@ -144,6 +146,9 @@ if __name__ == '__main__':
     opt = parser.parse_args()
     print(opt)
     
+    
+    
+
     train(opt)
 
 #train()
