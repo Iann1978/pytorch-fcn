@@ -52,7 +52,7 @@ device = torch.device("cuda:0")
 
 
 
-def fit(eporchs, model, criterion, optimizer,train_dl, valid_dl,debug=False):
+def fit(eporchs, model, criterion, optimizer,train_dl, valid_dl, writer=None,debug=False):
     for t in range(eporchs):
         for x_train,y_train in train_dl:
             y_pred = model(x_train)
@@ -78,6 +78,10 @@ def fit(eporchs, model, criterion, optimizer,train_dl, valid_dl,debug=False):
             #if t % 10 == 9:
             print(t, loss.item())
             
+
+
+            
+            
                 # Zero gradients, perform a backward pass, and update the weights.
             optimizer.zero_grad()
             loss.backward()
@@ -92,6 +96,8 @@ def fit(eporchs, model, criterion, optimizer,train_dl, valid_dl,debug=False):
         print('--------------------------------')
         print(t, average_loss.item())
         print('--------------------------------')
+        
+        writer.add_scalar('valid loss', average_loss, t)
 
 
 
@@ -123,14 +129,15 @@ def train(opt):
     images, masks = next(iter(train_dl))    
     writer = SummaryWriter('runs/fashion_mnist_experiment_1')
     writer.add_graph(model, images)
-    writer.close()
+    #writer.close()
     
    
 
     
     criterion =  lambda y_pred, y_true: torch.square(y_true-y_pred).sum()
     optimizer = torch.optim.SGD(model.parameters(), lr=1e-9)
-    fit(epochs, model,criterion, optimizer,train_dl,valid_dl,debug=False)
+    fit(epochs, model, criterion, optimizer, train_dl, valid_dl, 
+        writer=writer, debug=False)
 
     # Save model    
     torch.save(model, './inference/model')
@@ -151,7 +158,7 @@ def train(opt):
     topred3 = topred2.transpose(1,2,0)
     topred4 = topred3*255.
     cv2.imwrite('./inference/topred4.jpg', topred4)
-    
+    writer.close()
     return
 
     
