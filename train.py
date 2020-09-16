@@ -82,7 +82,16 @@ def fit(eporchs, model, criterion, optimizer,train_dl, valid_dl,debug=False):
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-
+        
+        losses = []
+        for x_valid, y_valid in train_dl:
+             y_pred_valid = model(x_valid)
+             loss = criterion(y_pred_valid, y_valid)
+             losses.append(loss.item())
+        average_loss = np.mean(losses)
+        print('--------------------------------')
+        print(t, average_loss.item())
+        print('--------------------------------')
 
 
 
@@ -97,6 +106,8 @@ def train(opt):
     #train_ds = SentimentDataset(device)
     train_ds = BagDataset(data_path,device=device,img_size=img_size)
     train_dl = torch.utils.data.DataLoader(train_ds, batch_size=batch_size,shuffle=False)
+    valid_ds = BagDataset(data_path,device=device,img_size=img_size)
+    valid_dl = torch.utils.data.DataLoader(valid_ds, batch_size=batch_size,shuffle=False)
     
     for xb,yb in train_dl:
          print(xb.shape)
@@ -119,7 +130,7 @@ def train(opt):
     
     criterion =  lambda y_pred, y_true: torch.square(y_true-y_pred).sum()
     optimizer = torch.optim.SGD(model.parameters(), lr=1e-9)
-    fit(epochs, model,criterion, optimizer,train_dl,None,debug=False)
+    fit(epochs, model,criterion, optimizer,train_dl,valid_dl,debug=False)
 
     # Save model    
     torch.save(model, './inference/model')
