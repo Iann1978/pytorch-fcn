@@ -15,11 +15,13 @@ import torch
 import torchvision
 import torch.utils.data
 import os
+import yaml
 
 from torch.utils.tensorboard import SummaryWriter
 
 from models.common import Conv
 from models.fcn import Net
+from models.fcn import Model
 
 from utils.datasets import SentimentDataset
 from utils.datasets import BagDataset
@@ -100,7 +102,8 @@ def train(opt):
          
     #if os.path.exists(test_file.txt)
     #model = Net()
-    model = torch.load(weights) if os.path.exists(weights) else Net()
+    #model = torch.load(weights) if os.path.exists(weights) else Net()
+    model = Model(cfg='models/fcn8s.yaml')
     model.to(device)
    
     # Output model to tensorboard
@@ -156,4 +159,5 @@ if __name__ == '__main__':
     print(opt)
     
 
+    
     train(opt)

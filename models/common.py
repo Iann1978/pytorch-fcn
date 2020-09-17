@@ -4,7 +4,8 @@ Created on Tue Sep  8 16:43:49 2020
 
 @author: Iann
 """
-
+import math
+import torch
 import torch.nn as nn
 
             
@@ -13,6 +14,9 @@ def autopad(k, p=None):  # kernel, padding
     if p is None:
         p = k // 2 if isinstance(k, int) else [x // 2 for x in k]  # auto-pad
     return p
+def DWConv(c1, c2, k=1, s=1, act=True):
+    # Depthwise convolution
+    return Conv(c1, c2, k, s, g=math.gcd(c1, c2), act=act)
 
 
 class Conv(nn.Module):
