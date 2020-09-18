@@ -16,12 +16,13 @@ import torchvision
 import torch.utils.data
 import os
 import yaml
+import shutil
 
 from torch.utils.tensorboard import SummaryWriter
 
 from models.common import Conv
 from models.fcn import Net
-from models.fcn import Model
+
 
 from utils.datasets import SentimentDataset
 from utils.datasets import BagDataset
@@ -102,12 +103,14 @@ def train(opt):
          
     #if os.path.exists(test_file.txt)
     #model = Net()
-    #model = torch.load(weights) if os.path.exists(weights) else Net()
-    model = Model(cfg='models/fcn8s.yaml')
+    model = torch.load(weights) if os.path.exists(weights) else Net()
+    #model = Model(cfg='models/fcn8s.yaml')
     model.to(device)
    
     # Output model to tensorboard
-    images, masks = next(iter(train_dl))    
+    images, masks = next(iter(train_dl))  
+    if os.path.exists('runs/fashion_mnist_experiment_1'):
+        shutil.rmtree('runs/fashion_mnist_experiment_1')
     writer = SummaryWriter('runs/fashion_mnist_experiment_1')
     writer.add_graph(model, images)
     #writer.close()
