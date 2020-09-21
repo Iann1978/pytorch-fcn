@@ -67,17 +67,25 @@ class BagDataset(torch.utils.data.Dataset):
         self.msk_dir = os.path.join(data_dir,"masks")
         self.img_size = img_size
         self.device = device
-        self.img_count = len([lists for lists in os.listdir(self.img_dir) if os.path.isfile(os.path.join(self.img_dir, lists))])
+        #self.img_count = len([lists for lists in os.listdir(self.img_dir) if os.path.isfile(os.path.join(self.img_dir, lists))])
         
+        self.images = [f for f in os.listdir(self.img_dir) if os.path.isfile(os.path.join(self.img_dir,f))]
+        self.masks =  [f for f in os.listdir(self.msk_dir) if os.path.isfile(os.path.join(self.msk_dir,f))]
+        self.images.sort()
+        self.masks.sort()
+        assert len(self.images) == len(self.masks)
+        self.img_count = len(self.images)
 
     def __len__(self):
         return self.img_count
         
     def __getitem__(self, idx):
         
-        img_file = os.path.join(self.img_dir,"%d.jpg"%idx)
-        msk_file = os.path.join(self.msk_dir,"%d.jpg"%idx)
+        #img_file = os.path.join(self.img_dir,"%d.jpg"%idx)
+        #msk_file = os.path.join(self.msk_dir,"%d.jpg"%idx)
         
+        img_file = os.path.join(self.img_dir,self.images[idx])
+        msk_file = os.path.join(self.msk_dir,self.masks[idx])
         
         x_train0 = cv2.imread(img_file)
         x_train0 = cv2.resize(x_train0, self.img_size)

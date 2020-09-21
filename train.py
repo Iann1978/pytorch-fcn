@@ -34,7 +34,10 @@ device = torch.device("cuda:0")
 
 
 def fit(eporchs, model, criterion, optimizer,train_dl, valid_dl, writer=None,debug=False):
+    print('')
     for t in range(eporchs):
+        
+       
         for x_train,y_train in train_dl:
             y_pred = model(x_train)
             
@@ -57,7 +60,7 @@ def fit(eporchs, model, criterion, optimizer,train_dl, valid_dl, writer=None,deb
             loss = criterion(y_pred, y_train)
                 
             #if t % 10 == 9:
-            print(t, loss.item())
+            print('\r',  t, loss.item(),end='')
             
 
 
@@ -68,15 +71,17 @@ def fit(eporchs, model, criterion, optimizer,train_dl, valid_dl, writer=None,deb
             loss.backward()
             optimizer.step()
         
+        
+        # Evaluation
         losses = []
-        for x_valid, y_valid in train_dl:
+        for x_valid, y_valid in valid_dl:
              y_pred_valid = model(x_valid)
              loss = criterion(y_pred_valid, y_valid)
              losses.append(loss.item())
         average_loss = np.mean(losses)
-        print('--------------------------------')
+        #print('--------------------------------')
         print(t, average_loss.item())
-        print('--------------------------------')
+        #print('--------------------------------')
         
         writer.add_scalar('valid loss', average_loss, t)
 
@@ -90,10 +95,13 @@ def train(opt):
     img_size = tuple(opt.img_size)
     data_path = opt.data_path
     
+    with open(opt.data) as f:
+        data_dict = yaml.load(f, Loader=yaml.FullLoader)  # model dict
+    
     #train_ds = SentimentDataset(device)
-    train_ds = BagDataset(data_path,device=device,img_size=img_size)
+    train_ds = BagDataset(data_dict['train'],device=device,img_size=img_size)
     train_dl = torch.utils.data.DataLoader(train_ds, batch_size=batch_size,shuffle=False)
-    valid_ds = BagDataset(data_path,device=device,img_size=img_size)
+    valid_ds = BagDataset(data_dict['val'],device=device,img_size=img_size)
     valid_dl = torch.utils.data.DataLoader(valid_ds, batch_size=batch_size,shuffle=False)
     
     for xb,yb in train_dl:
@@ -154,6 +162,7 @@ def train(opt):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--data-path', type=str, default='./data/two_bags', help='data path')
+    parser.add_argument('--data', type=str, default='data/two_bags.yaml', help='data.yaml path')
     parser.add_argument('--batch-size', type=int, default=2, help='total batch size for all GPUs')
     parser.add_argument('--img-size', nargs='+', type=int, default=[320, 320], help='train,test sizes')
     parser.add_argument('--epochs', type=int, default=5)
