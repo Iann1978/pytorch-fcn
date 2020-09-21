@@ -10,13 +10,18 @@ import os
 import torch
 import cv2
 import numpy as np
+from utils.general import check_file
 
 def detect(opt):
     source = opt.source
     weights = opt.weights
     
-    if not os.path.exists(weights):
-        return 
+    if not check_file(source):
+        return
+    
+    if  not check_file(weights):
+        return
+    
     device = torch.device("cuda:0")
     model = torch.load(weights) 
     model.to(device)
@@ -37,7 +42,7 @@ def detect(opt):
     pred = pred*255.
     cv2.imwrite('./runs/pred.jpg', pred)
     
-    
+    print('detect finished. you can check the result in folder runs.')
     
     
     return
