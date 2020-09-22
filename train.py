@@ -19,6 +19,7 @@ import yaml
 import shutil
 
 from torch.utils.tensorboard import SummaryWriter
+from utils.general import increment_dir
 
 from models.common import Conv
 from models.fcn import Net
@@ -35,6 +36,19 @@ device = torch.device("cuda:0")
 
 def fit(eporchs, model, criterion, optimizer,train_dl, valid_dl, writer=None,debug=False):
     print('')
+    
+    # Get work dir
+    if writer:
+        wdir = writer.log_dir
+    else:
+        wdir = increment_dir('./runs/exp')
+        os.mkdir(wdir)
+
+    # Initialize average loss        
+    last_average_loss = float("inf")
+
+
+    # Start fit
     for t in range(eporchs):
         
        
@@ -83,9 +97,21 @@ def fit(eporchs, model, criterion, optimizer,train_dl, valid_dl, writer=None,deb
         print(t, average_loss.item())
         #print('--------------------------------')
         
+
+        best = os.path.join(wdir,'best.pt')
+        last = os.path.join(wdir,'last.pt')
+        
+        torch.save(model, last)
+        
+        if average_loss < last_average_loss:
+            torch.save(model, best)
+            last_average_loss = average_loss
+        
         writer.add_scalar('valid loss', average_loss, t)
 
-
+ 
+    
+    
 
 def train(opt):
     
@@ -95,6 +121,11 @@ def train(opt):
     img_size = tuple(opt.img_size)
     data_path = opt.data_path
     
+    # Create work dir
+    wdir = increment_dir('./runs/exp')
+    os.mkdir(wdir)
+    
+    # Load data
     with open(opt.data) as f:
         data_dict = yaml.load(f, Loader=yaml.FullLoader)  # model dict
     
@@ -109,17 +140,19 @@ def train(opt):
          print(yb.shape)
          break
          
+     
+    # Load model
     #if os.path.exists(test_file.txt)
     #model = Net()
     model = torch.load(weights) if os.path.exists(weights) else Net()
     #model = Model(cfg='models/fcn8s.yaml')
     model.to(device)
+    
+    
    
     # Output model to tensorboard
     images, masks = next(iter(train_dl))  
-    if os.path.exists('runs/fashion_mnist_experiment_1'):
-        shutil.rmtree('runs/fashion_mnist_experiment_1')
-    writer = SummaryWriter('runs/fashion_mnist_experiment_1')
+    writer = SummaryWriter(wdir)
     writer.add_graph(model, images)
     #writer.close()
     
@@ -132,6 +165,7 @@ def train(opt):
         writer=writer, debug=False)
 
     # Save model    
+    print('wight file has been saved to ./inference/model')
     torch.save(model, './inference/model')
     
     
@@ -170,6 +204,7 @@ if __name__ == '__main__':
     opt = parser.parse_args()
     print(opt)
     
+
 
     
     train(opt)
