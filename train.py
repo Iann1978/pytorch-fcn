@@ -19,7 +19,7 @@ import yaml
 import shutil
 
 from torch.utils.tensorboard import SummaryWriter
-from utils.general import increment_dir
+from utils.general import increment_dir, get_latest_run
 
 from models.common import Conv
 from models.fcn import Net
@@ -98,15 +98,18 @@ def fit(eporchs, model, criterion, optimizer,train_dl, valid_dl, writer=None,deb
         #print('--------------------------------')
         
 
-        best = os.path.join(wdir,'best.pt')
-        last = os.path.join(wdir,'last.pt')
-        
-        torch.save(model, last)
-        
+        # Save best and last
+        weights_dir = os.path.join(wdir,'weights')
+        if not os.path.exists(weights_dir):
+            os.mkdir(weights_dir)
+        best = os.path.join(weights_dir,'best.pt')
+        last = os.path.join(weights_dir,'last.pt')
+        torch.save(model, last)        
         if average_loss < last_average_loss:
             torch.save(model, best)
             last_average_loss = average_loss
         
+        # Write to tensorboard
         writer.add_scalar('valid loss', average_loss, t)
 
  
@@ -199,12 +202,23 @@ if __name__ == '__main__':
     parser.add_argument('--data', type=str, default='data/two_bags.yaml', help='data.yaml path')
     parser.add_argument('--batch-size', type=int, default=2, help='total batch size for all GPUs')
     parser.add_argument('--img-size', nargs='+', type=int, default=[320, 320], help='train,test sizes')
+    parser.add_argument('--resume', nargs='?', const='get_last', default=False,
+                        help='resume from given path/last.pt, or most recent run if blank')
     parser.add_argument('--epochs', type=int, default=5)
     parser.add_argument('--weights', type=str, default='', help='initial weights path')
     opt = parser.parse_args()
     print(opt)
     
+    # latest = get_latest_run()
 
-
+    # print(latest)
     
+    
+    # Resume
+    last = get_latest_run() if opt.resume == 'get_last' else opt.resume  # resume from most recent run
+    if last and not opt.weights:
+        print(f'Resuming training from {last}')
+    opt.weights = last if opt.resume and not opt.weights else opt.weights
+    print(opt)
+     
     train(opt)
