@@ -49,6 +49,7 @@ def fit(eporchs, model, criterion, optimizer,train_dl, valid_dl, writer=None,deb
 
 
     # Start fit
+    print('eporch                 loss        average_loss')
     for t in range(eporchs):
         
        
@@ -74,7 +75,7 @@ def fit(eporchs, model, criterion, optimizer,train_dl, valid_dl, writer=None,deb
             loss = criterion(y_pred, y_train)
                 
             #if t % 10 == 9:
-            print('\r',  t, loss.item(),end='')
+            print('\r%6d %20f'%(t, loss.item()),end='')
             
 
 
@@ -94,7 +95,7 @@ def fit(eporchs, model, criterion, optimizer,train_dl, valid_dl, writer=None,deb
              losses.append(loss.item())
         average_loss = np.mean(losses)
         #print('--------------------------------')
-        print(t, average_loss.item())
+        print('%20f'% average_loss.item())
         #print('--------------------------------')
         
 
