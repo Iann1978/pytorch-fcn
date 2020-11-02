@@ -31,7 +31,7 @@ from utils.datasets import BagDataset
 device = torch.device("cuda:0")
 
 
-def iou(y_train0, y_pred0):
+def iou(y_train0, y_pred0, debug=False):
     y_train1 = 1 - y_train0
     y_pred1 = 1 - y_pred0
     ret,y_pred2 = cv2.threshold(y_pred1,0.5,1,cv2.THRESH_BINARY)
@@ -42,21 +42,22 @@ def iou(y_train0, y_pred0):
     
     intercetion = cal_intercetion(y_pred3,y_train1)
     union = cal_union(y_pred3,y_train1)
-    
-    cv2.imshow("y_train1", y_train1)
-    cv2.imshow("y_pred2",y_pred2)
-    
-    
-   
-    cv2.imshow("intercetion",intercetion)
-    cv2.imshow("union",union)
-    #cv2.waitKey()
+
+    if debug:    
+        cv2.imshow("y_train1", y_train1)
+        cv2.imshow("y_pred2",y_pred2)
+        cv2.imshow("intercetion",intercetion)
+        cv2.imshow("union",union)
+        cv2.waitKey()
     
     intercetion_score = np.sum(intercetion)
     union_score = np.sum(union)
-    print("intercetion_score:",intercetion_score)
-    print("union_score",union_score)
-    print("iou", intercetion_score/union_score)
+    iou_score = intercetion_score/union_score
+    if debug:    
+        print("intercetion_score:",intercetion_score)
+        print("union_score",union_score)
+        print("iou_score", iou_score)
+    return iou_score
 
 
 def fit(eporchs, model, criterion, optimizer,train_dl, valid_dl, writer=None,debug=False):
@@ -74,7 +75,7 @@ def fit(eporchs, model, criterion, optimizer,train_dl, valid_dl, writer=None,deb
 
 
     # Start fit
-    print('eporch                 loss        average_loss')
+    print('eporch,                loss,       average_loss,         mean-iou')
     for t in range(eporchs):
         
        
@@ -99,7 +100,7 @@ def fit(eporchs, model, criterion, optimizer,train_dl, valid_dl, writer=None,deb
             #cv2.waitKey()
             
             
-            iou(y_train0, y_pred0)
+            #iou(y_train0, y_pred0)
             # if (debug):
             #     y_pred0 = y_pred.cpu().detach().numpy()[0];
             #     y_pred0 = y_pred0.transpose(1,2,0)
@@ -115,7 +116,7 @@ def fit(eporchs, model, criterion, optimizer,train_dl, valid_dl, writer=None,deb
             loss = criterion(y_pred, y_train)
                 
             #if t % 10 == 9:
-            print('\r%6d %20f'%(t, loss.item()),end='')
+            print('\r%6d,%20f,'%(t, loss.item()),end='')
             
 
 
@@ -129,13 +130,26 @@ def fit(eporchs, model, criterion, optimizer,train_dl, valid_dl, writer=None,deb
         
         # Evaluation
         losses = []
+        ious = []
         for x_valid, y_valid in valid_dl:
-             y_pred_valid = model(x_valid)
-             loss = criterion(y_pred_valid, y_valid)
-             losses.append(loss.item())
+            y_pred_valid = model(x_valid)
+            loss = criterion(y_pred_valid, y_valid)
+            losses.append(loss.item())
+             
+            y_train0 = y_valid.cpu().detach().numpy()[0];
+            y_train0 = y_train0.transpose(1,2,0)
+            y_pred0 = y_pred_valid.cpu().detach().numpy()[0];
+            y_pred0 = y_pred0.transpose(1,2,0)
+            
+            iou_score =  iou(y_train0, y_pred0)
+            ious.append(iou_score)
+            
+           
+            
         average_loss = np.mean(losses)
+        mean_iou = np.mean(ious)
         #print('--------------------------------')
-        print('%20f'% average_loss.item())
+        print('%20f,%20f'% (average_loss.item(),mean_iou.item()))
         #print('--------------------------------')
         
 
