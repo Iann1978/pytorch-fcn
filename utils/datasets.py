@@ -99,12 +99,16 @@ class BagDataset(torch.utils.data.Dataset):
         
         
         y_train0 = cv2.imread(msk_file)
+        y_train0 = 255-y_train0
         y_train0 = cv2.resize(y_train0, self.img_size)
         y_train1 = y_train0[:,:,2]
         y_train2 = y_train1[np.newaxis, np.newaxis,:]
         y_train3 = y_train2.astype(np.float32)
         y_train4 = y_train3/255.0;
         y_train = torch.Tensor(y_train4)
+        
+                #cv2.imshow("BagDataset.x_train0",x_train0)
+        #
         
         #cv2.imshow("x_train0", x_train0)
         #cv2.imshow("y_train0", y_train0)
