@@ -27,6 +27,7 @@ from models.fcn import Net
 
 from utils.datasets import SentimentDataset
 from utils.datasets import BagDataset
+from utils.datasets import CocoDataset
 
 device = torch.device("cuda:0")
 
@@ -188,9 +189,11 @@ def train(opt):
         data_dict = yaml.load(f, Loader=yaml.FullLoader)  # model dict
     
     #train_ds = SentimentDataset(device)
-    train_ds = BagDataset(data_dict['train'],device=device,img_size=img_size)
+    #train_ds = BagDataset(data_dict['train'],device=device,img_size=img_size)
+    train_ds = CocoDataset(data_dict['train'],device=device,img_size=img_size)
     train_dl = torch.utils.data.DataLoader(train_ds, batch_size=batch_size,shuffle=False)
-    valid_ds = BagDataset(data_dict['val'],device=device,img_size=img_size)
+    #valid_ds = BagDataset(data_dict['val'],device=device,img_size=img_size)
+    valid_ds = CocoDataset(data_dict['val'],device=device,img_size=img_size)
     valid_dl = torch.utils.data.DataLoader(valid_ds, batch_size=batch_size,shuffle=False)
     
     for xb,yb in train_dl:
